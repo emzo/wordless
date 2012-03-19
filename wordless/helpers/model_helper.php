@@ -29,7 +29,36 @@ class ModelHelper {
    * 
    * @ingroup helperfunc
    */
-  function new_post_type($name, $supports = array("title", "editor")) {
+  function new_post_type($name, $supports = array("title", "editor"), $args = array()) {
+
+    if (!is_array($name)) {
+      $name = array(
+        "singular" => $name,
+        "plural" => pluralize($name)
+      );
+    }
+
+    $defaults = array(
+      'labels' => $this->post_type_labels($name),
+      'public' => true,
+      'publicly_queryable' => true,
+      'show_ui' => true,
+      'query_var' => true,
+      'has_archive' => true,
+      'rewrite' => array('slug' => $name["plural"]),
+      'capability_type' => 'post',
+      'hierarchical' => false,
+      'menu_position' => null,
+      'supports' => $supports
+    );
+
+    register_post_type(
+      $name["singular"],
+      wp_parse_args($args, $defaults)
+    );
+  }
+
+  function post_type_labels($name) {
 
     if (!is_array($name)) {
       $name = array(
@@ -55,22 +84,7 @@ class ModelHelper {
       'menu_name' => $uc_plural
     );
 
-    register_post_type(
-      $name["singular"],
-      array(
-        'labels' => $labels,
-        'public' => true,
-        'publicly_queryable' => true,
-        'show_ui' => true,
-        'query_var' => true,
-        'has_archive' => true,
-        'rewrite' => array('slug' => $name["plural"]),
-        'capability_type' => 'post',
-        'hierarchical' => false,
-        'menu_position' => null,
-        'supports' => $supports
-      )
-    );
+    return $labels;
   }
 
   /**
@@ -83,8 +97,32 @@ class ModelHelper {
    * 
    * @ingroup helperfunc
    */
-  function new_taxonomy($name, $post_types, $hierarchical = true) {
+  function new_taxonomy($name, $post_types, $hierarchical = true, $args = array()) {
 
+    if (!is_array($name)) {
+      $name = array(
+        "singular" => $name,
+        "plural" => pluralize($name)
+      );
+    }
+
+    $defaults = array(
+      'hierarchical' => $hierarchical,
+      'labels' => $this->taxonomy_labels($name),
+      'show_ui' => true,
+      'query_var' => true,
+      'rewrite' => array('slug' => $name["plural"])
+    );
+
+    register_taxonomy(
+      $name["singular"],
+      $post_types,
+      wp_parse_args($args, $defaults)
+    );
+
+  }
+
+  function taxonomy_labels($name) {
     if (!is_array($name)) {
       $name = array(
         "singular" => $name,
@@ -109,18 +147,7 @@ class ModelHelper {
       "menu_name" => $uc_plural
     );
 
-    register_taxonomy(
-      $name["singular"],
-      $post_types,
-      array(
-        'hierarchical' => $hierarchical,
-        'labels' => $labels,
-        'show_ui' => true,
-        'query_var' => true,
-        'rewrite' => array('slug' => $name["plural"])
-      )
-    );
-
+    return $labels;
   }
 }
 
